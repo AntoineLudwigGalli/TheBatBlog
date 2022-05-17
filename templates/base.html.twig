@@ -21,12 +21,15 @@
     {#Inclusion du menu#}
     {% include 'partials/_main_navbar.html.twig' %}
 
+    {# Affihcage des messages flashes #}
+    {% include 'partials/flashes.html.twig' %}
+
     {# Block body #}
     {% block body %}{% endblock %}
 
-
     {# Bootstrap #}
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+
     {# Block JS #}
     {% block js %}{% endblock %}
 </body>

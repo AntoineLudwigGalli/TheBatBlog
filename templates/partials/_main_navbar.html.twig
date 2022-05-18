@@ -4,10 +4,11 @@
 
         <a class="navbar-brand" href="{{ path('main_home') }}">
             {# TODO: Dynamiser nom du site #}
-            <img src="{{ asset('images/embleme-batman.png') }}" alt="" class="img-fluid main-navbar-logo">Le Blog de Batman
-        </a>
+            <img src="{{ asset('images/embleme-batman.png') }}" alt="" class="img-fluid main-navbar-logo">Le Blog de
+            Batman </a>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbarContent" aria-controls="mainNavbarContent" aria-expanded="false" aria-label="Afficher la navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbarContent"
+                aria-controls="mainNavbarContent" aria-expanded="false" aria-label="Afficher la navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -17,10 +18,31 @@
             {# Boutons à gauche #}
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link{{ route == 'main_home' ? ' active' }}" href="{{ path('main_home') }}">
-                        <i class="fa-solid fa-house"></i>
-                        Accueil
-                    </a>
+                    <a class="nav-link{{ route == 'main_home' ? ' active' }}" href="{{ path('main_home') }}"> <i
+                                class="fa-solid fa-house"></i> Accueil </a>
+                </li>
+                <li class="nav-item dropdown">
+
+                    <a class="nav-link {{ route == 'blog_new_publication' ? ' active' }} dropdown-toggle" href="#"
+                       id="navbarDropdown"
+                       role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false"> <i class="fa-solid fa-newspaper"></i> Blog </a>
+
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+
+                        {# Boutons si l'utilisateur est un administrateur #}
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item" href="{{ path('blog_new_publication') }}">
+                                     Nouvelle Publication </a>
+                            </li>
+                        {% endif %}
+
+                    </ul>
                 </li>
             </ul>
 
@@ -32,26 +54,24 @@
 
                     <li class="nav-item dropdown">
 
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-solid fa-user"></i>
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false"> <i class="fa-solid fa-user"></i>
                             {{ app.user.pseudonym }}
                         </a>
 
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li>
-                                <a class="dropdown-item" href="{{ path('main_profil') }}">
-                                    <i class="fa-solid fa-user-gear"></i>
-                                    Mon profil
-                                </a>
+                                <a class="dropdown-item" href="{{ path('main_profil') }}"> <i
+                                            class="fa-solid fa-user-gear"></i> Mon profil </a>
                             </li>
 
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
 
                             <li>
-                                <a class="dropdown-item" href="{{ path('app_logout') }}">
-                                    <i class="fa-solid fa-right-from-bracket"></i>
-                                    Déconnexion
-                                </a>
+                                <a class="dropdown-item" href="{{ path('app_logout') }}"> <i
+                                            class="fa-solid fa-right-from-bracket"></i> Déconnexion </a>
                             </li>
                         </ul>
                     </li>
@@ -60,16 +80,12 @@
                 {% else %}
                     <li class="nav-item">
                         <a class="nav-link{{ route == 'app_register' ? ' active' }}" href="{{ path('app_register') }}">
-                            <i class="fa-solid fa-user-plus"></i>
-                            Inscription
-                        </a>
+                            <i class="fa-solid fa-user-plus"></i> Inscription </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link{{ route == 'app_login' ? ' active' }}" href="{{ path('app_login') }}">
-                            <i class="fa-solid fa-right-to-bracket"></i>
-                            Connexion
-                        </a>
+                        <a class="nav-link{{ route == 'app_login' ? ' active' }}" href="{{ path('app_login') }}"> <i
+                                    class="fa-solid fa-right-to-bracket"></i> Connexion </a>
                     </li>
 
                 {% endif %}

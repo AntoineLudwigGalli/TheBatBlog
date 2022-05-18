@@ -72,9 +72,23 @@ class BlogController
         'slug' => 'slug']])]
     public function publicationView(Article $article): Response
     {
-
         return $this->render('blog/publication_view.html.twig', [
             'article' => $article
+        ]);
+    }
+
+    /**
+     * Contrôleur de la page qui liste les articles
+     */
+    #[Route('/publications/liste', name: 'publication_list')]
+    public function publicationList(ManagerRegistry $doctrine): Response{
+
+        $articleRepo = $doctrine->getRepository(Article::class);
+
+        $articles = $articleRepo->findAll();
+
+        return $this->render('blog/publication_list.html.twig', [
+            'articles' => $articles,
         ]);
     }
 }

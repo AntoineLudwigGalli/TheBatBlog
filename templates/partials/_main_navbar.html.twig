@@ -29,6 +29,10 @@
                        data-bs-toggle="dropdown" aria-expanded="false"> <i class="fa-solid fa-newspaper"></i> Blog </a>
 
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li>
+                            <a class="dropdown-item" href="{{ path('blog_publication_list') }}">
+                                Publication </a>
+                        </li>
 
                         {# Boutons si l'utilisateur est un administrateur #}
                         {% if is_granted('ROLE_ADMIN') %}

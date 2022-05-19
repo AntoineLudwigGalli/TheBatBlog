@@ -14,8 +14,8 @@
     {# Bootstrap #}
     <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-    {# Block css #}
-    {% block css %}{% endblock %}
+    {# Block fichiers en head (ex: fichiers css) #}
+    {% block head %}{% endblock %}
 </head>
 <body>
     {#Inclusion du menu#}
@@ -30,7 +30,7 @@
     {# Bootstrap #}
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
 
-    {# Block JS #}
-    {% block js %}{% endblock %}
+    {# Block fichiers en footer (ex: fichiers JS) #}
+    {% block footer %}{% endblock %}
 </body>
 </html>

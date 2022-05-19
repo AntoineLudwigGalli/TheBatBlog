@@ -5,11 +5,14 @@ namespace App\Controller;
 use App\Entity\Article;
 use App\Form\NewArticleFormType;
 use Doctrine\Persistence\ManagerRegistry;
+use Knp\Component\Pager\PaginatorInterface;
+use mysql_xdevapi\Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
@@ -81,11 +84,22 @@ class BlogController
      * Contrôleur de la page qui liste les articles
      */
     #[Route('/publications/liste', name: 'publication_list')]
-    public function publicationList(ManagerRegistry $doctrine): Response{
+    public function publicationList(ManagerRegistry $doctrine, Request $request, PaginatorInterface $paginator): Response{
 
-        $articleRepo = $doctrine->getRepository(Article::class);
+        $requestedPage = $request->query->getInt('page', 1);
 
-        $articles = $articleRepo->findAll();
+        if($requestedPage < 1){
+            throw new NotFoundHttpException();
+        }
+
+        $em = $doctrine->getManager();
+
+        $query = $em->createQuery('SELECT a FROM App\Entity\Article a ORDER BY a.publicationDate DESC');
+        $articles = $paginator->paginate(
+            $query, //Requête créée juste avant
+            $requestedPage, // Page qu'on souhaite voir
+            8, // Nombre d'articles à afficher par page
+        );
 
         return $this->render('blog/publication_list.html.twig', [
             'articles' => $articles,

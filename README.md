@@ -1,4 +1,4 @@
-# <center>**The BatBlog's Project**</center>
+# The BatBlog's Project
 
 ## Installation
 

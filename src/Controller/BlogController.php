@@ -85,7 +85,7 @@ class BlogController extends AbstractController {
      *
      * Accès réservé aux admins
      */
-    #[Route("/publication/suppression/{id}/", name: 'publication_delete', priority: 10)]
+    #[Route("/publications/suppression/{id}/", name: 'publication_delete', priority: 10)]
     #[isGranted("ROLE_ADMIN")]
     public function publicationDelete(Article $article, Request $request, ManagerRegistry $doctrine): Response {
         $csrfToken = $request->query->get('csrf_token', '');
@@ -104,5 +104,36 @@ class BlogController extends AbstractController {
         return $this->redirectToRoute('blog_publication_list');
     }
 
+    /**
+     * Contrôleur de la page admin via son id dans l'url pour modifier un article
+     *
+     * Accès réservé aux admins
+     */
+    #[Route("/publications/modifier/{id}/", name: 'publication_edit', priority: 10)]
+    #[isGranted("ROLE_ADMIN")]
+    public function publicationEdit(Article $article, Request $request, ManagerRegistry $doctrine,
+        SluggerInterface $slugger): Response {
+
+        $form = $this->createForm(NewArticleFormType::class, $article);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $article->setSlug($slugger->slug($article->getTitle())->lower());
+
+            $em = $doctrine->getManager();
+            $em->flush();
+
+            $this->addFlash('success', 'Article supprimé avec succès');
+            return $this->redirectToRoute('blog_publication_view', [
+                'id' => $article->getId(),
+                'slug' => $article->getSlug(),
+            ]);
+        }
+
+        return $this->render('blog/publication_edit.html.twig', [
+            'form' => $form->createView(),]);
+    }
 
 }

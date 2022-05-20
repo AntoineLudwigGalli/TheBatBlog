@@ -14,3 +14,6 @@
 /public/images/profil/*
 !/public/images/profil/.gitignore
 ###< exclusions customs ###
+###> liip/imagine-bundle ###
+/public/media/cache/
+###< liip/imagine-bundle ###

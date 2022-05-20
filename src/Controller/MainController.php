@@ -3,9 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\Article;
+use App\Form\EditPhotoFormType;
 use Doctrine\Persistence\ManagerRegistry;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -42,5 +44,57 @@ class MainController extends AbstractController
 
 
         return $this->render('main/profil.html.twig');
+    }
+
+    /**
+     * Contrôleur de la page de modification de la photo de profil
+     * Accès réservé aux connectés
+     */
+
+    #[Route('/editer-photo/', name: 'edit_photo')]
+    #[isGranted('ROLE_USER')]
+    public function editPhoto(Request $request, ManagerRegistry $doctrine): Response
+    {
+
+        $form=$this->createForm(EditPhotoFormType::class);
+
+        $form->handleRequest($request);
+
+
+        if($form->isSubmitted() && $form->isValid()){
+            $photo = $form->get('photo')->getData();
+
+            if(
+                $this->getUser()->getPhoto() != null &&
+                file_exists($this->getParameter('app.user.photo.directory') . $this->getUser()->getPhoto() )
+            ){
+                unlink($this->getParameter('app.user.photo.directory') . $this->getUser()->getPhoto() );
+            }
+
+            /*todo : si l'utilisateur a déjà une photo de profil, la supprimer*/
+
+            /*Génération nom*/
+            do{
+                $newFileName = md5( random_bytes(100) ) . '.' . $photo->guessExtension();
+            } while (file_exists($this->getParameter('app.user.photo.directory') .$newFileName));
+
+            $this->getUser()->setPhoto($newFileName);
+
+            $em = $doctrine->getManager();
+            $em->flush();
+
+            $photo -> move(
+                $this->getParameter('app.user.photo.directory'),
+                $newFileName,
+            );
+
+            $this->addFlash('success', 'Photo de profil modifiée avec succès');
+
+            return $this->redirectToRoute('main_profil');
+        }
+
+        return $this->render('main/edit_photo.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 }

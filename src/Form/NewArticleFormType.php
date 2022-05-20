@@ -48,13 +48,13 @@ class NewArticleFormType extends AbstractType
                     ])
                 ],
             ])
-            ->add('save', SubmitType::class, [
-                'label' => 'Publier',
-                'attr' => [
-                    'class' => 'btn btn-outline-primary w-100',
-                ]
-            ])
-        ;
+        ->add('save', SubmitType::class, [
+            'label' => 'Publier',
+            'attr' => [
+                'class' => 'btn btn-outline-primary w-100',
+            ]
+        ])
+    ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

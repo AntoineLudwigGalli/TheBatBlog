@@ -55,6 +55,20 @@
 
                         {% endif %}
 
+                        {% for comment in comments %}
+
+                                {{ comment }}
+
+
+
+                        {% endfor %}
+
+
+                        {% if is_granted('ROLE_USER') %}
+                            <h2 class="text-center my-5">Écrire un commentaire</h2>
+                            {{ form(form) }}
+                        {% endif %}
+
                     </div>
 
                 </article>

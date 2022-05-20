@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Article;
+use App\Entity\Comment;
+use App\Form\CommentFormType;
 use App\Form\NewArticleFormType;
 use Doctrine\Persistence\ManagerRegistry;
 use Knp\Component\Pager\PaginatorInterface;
@@ -31,7 +33,9 @@ class BlogController extends AbstractController {
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $article->setPublicationDate(new \DateTime())->setAuthor($this->getUser())
+            $article
+                ->setPublicationDate(new \DateTime())
+                ->setAuthor($this->getUser())
                 ->setSlug($slugger->slug($article->getTitle())->lower());
 
             $em = $doctrine->getManager();
@@ -44,7 +48,10 @@ class BlogController extends AbstractController {
                 ['id' => $article->getId(), 'slug' => $article->getSlug(),]);
         }
 
-        return $this->render('blog/new_publication.html.twig', ['form' => $form->createView(),]);
+        return $this->render('blog/new_publication.html.twig', ['form' => $form->createView(),
+
+
+        ]);
     }
 
     /**
@@ -52,8 +59,37 @@ class BlogController extends AbstractController {
      */
     #[Route('/publication/{id}/{slug}/', name: 'publication_view')]
     #[ParamConverter('article', options: ['mapping' => ['id' => 'id', 'slug' => 'slug']])]
-    public function publicationView(Article $article): Response {
-        return $this->render('blog/publication_view.html.twig', ['article' => $article]);
+    public function publicationView(Article $article, Request $request, ManagerRegistry $doctrine): Response {
+
+        $comments = new Comment();
+
+        $form = $this->createForm(CommentFormType::class, $comments);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $comments
+                ->setPublicationDate(new \DateTime())
+                ->setAuthor($this->getUser())
+                ->setArticle($article);
+            ;
+
+            $em = $doctrine->getManager();
+            $em->persist($comments);
+            $em->flush();
+
+            $this->addFlash('success', 'Commentaire publié avec succès');
+
+            return $this->redirectToRoute('blog_publication_view', [
+                'id' => $article->getId(),
+                'slug' => $article->getSlug(),
+                ]);
+        }
+        return $this->render('blog/publication_view.html.twig', [
+            'article' => $article,
+            'form' => $form->createView(),
+            'comments' => $comments,
+            ]);
     }
 
     /**
@@ -126,14 +162,10 @@ class BlogController extends AbstractController {
             $em->flush();
 
             $this->addFlash('success', 'Article supprimé avec succès');
-            return $this->redirectToRoute('blog_publication_view', [
-                'id' => $article->getId(),
-                'slug' => $article->getSlug(),
-            ]);
+            return $this->redirectToRoute('blog_publication_view',
+                ['id' => $article->getId(), 'slug' => $article->getSlug(),]);
         }
 
-        return $this->render('blog/publication_edit.html.twig', [
-            'form' => $form->createView(),]);
+        return $this->render('blog/publication_edit.html.twig', ['form' => $form->createView(),]);
     }
-
 }

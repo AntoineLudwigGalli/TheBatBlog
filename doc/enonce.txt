@@ -1,0 +1,15 @@
+
+1) Créer l'entité "Comment"
+    -> content : type text
+    -> publicationDate : type datetime
+    -> article : type relation vers Article
+    -> author: type relation vers User
+
+
+2) Créer un formulaire permettant d'ajouter un nouveau commentaire dans la BDD. Ce formulaire doit apparaître en bas de la page de vue d'un article SEULEMENT si l'utilisateur est connecté.
+
+3) Afficher sous chaque article tous les commentaires qui lui sont lié. La photo de profil de l'auteur de chaque commentaire doit être optimisée et redimmensionnée en 100x100 maximum et à 75% de qualité.
+
+4) Créer une page de suppression permettant de supprimer un commentaire via son id passé dans l'URL. Sur chaque commentaire, un bouton "supprimer" doit emmener sur cette page, seulement pour les admins.
+
+5) Rajouter la création de faux commentaires dans les fixtures (entre 0 et 10 par articles).

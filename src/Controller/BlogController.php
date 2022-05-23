@@ -60,35 +60,39 @@ class BlogController extends AbstractController {
     #[Route('/publication/{id}/{slug}/', name: 'publication_view')]
     #[ParamConverter('article', options: ['mapping' => ['id' => 'id', 'slug' => 'slug']])]
     public function publicationView(Article $article, Request $request, ManagerRegistry $doctrine): Response {
+if(!$this->getUser()){
+    return $this->render('blog/publication_view.html.twig', [
+        'article' => $article,
+    ]);
+}
+        $comment = new Comment();
 
-        $comments = new Comment();
-
-        $form = $this->createForm(CommentFormType::class, $comments);
+        $form = $this->createForm(CommentFormType::class, $comment);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $comments
+            $comment
                 ->setPublicationDate(new \DateTime())
                 ->setAuthor($this->getUser())
                 ->setArticle($article);
             ;
 
             $em = $doctrine->getManager();
-            $em->persist($comments);
+            $em->persist($comment);
             $em->flush();
 
             $this->addFlash('success', 'Commentaire publié avec succès');
 
-            return $this->redirectToRoute('blog_publication_view', [
-                'id' => $article->getId(),
-                'slug' => $article->getSlug(),
-                ]);
+            unset($comment);
+            unset($form);
+
+            $comment = new Comment;
+            $form = $this->createForm(CommentFormType::class, $comment);
         }
         return $this->render('blog/publication_view.html.twig', [
             'article' => $article,
-            'form' => $form->createView(),
-            'comments' => $comments,
+            'form' => $form->createView()
             ]);
     }
 

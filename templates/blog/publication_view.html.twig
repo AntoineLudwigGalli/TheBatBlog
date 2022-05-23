@@ -73,7 +73,7 @@
                                                     {% if comment.author.photo is null %}
                                                         <img class="img-fluid" src="{{ asset('images/profil_default.jpg' )|imagine_filter('comment') }}" alt="">
                                                     {% else %}
-                                                        <img class="img-fluid" src="{{ asset('images/profils/' ~ comment.author.photo )|imagine_filter('comment') }}" alt="">
+                                                        <img class="img-fluid" src="{{ asset('images/profil/' ~ comment.author.photo )|imagine_filter('comment') }}" alt="">
                                                     {% endif %}
 
                                                 </div>
@@ -103,10 +103,17 @@
 
                         </div>
 
-
-                    {% if is_granted('ROLE_USER') %}
+                    {#Si l'utilisateur est connecté#}
+                    {% if app.user%}
                         <h2 class="text-center my-5">Écrire un commentaire</h2>
                         {{ form(form) }}
+                    {% else %}
+                        <p class="text-center text-info mt-4"> Vous devez <a href="{{ path('app_login') }}">vous
+                                connecter</a> pour
+                            laisser
+                            un commentaire
+                            .</p>
+
                     {% endif %}
 
             </article>

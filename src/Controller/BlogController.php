@@ -33,10 +33,7 @@ class BlogController extends AbstractController {
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $article
-                ->setPublicationDate(new \DateTime())
-                ->setAuthor($this->getUser())
-                ->setSlug($slugger->slug($article->getTitle())->lower());
+            $article->setPublicationDate(new \DateTime())->setAuthor($this->getUser())->setSlug($slugger->slug($article->getTitle())->lower());
 
             $em = $doctrine->getManager();
             $em->persist($article);
@@ -44,8 +41,7 @@ class BlogController extends AbstractController {
 
             $this->addFlash('success', 'Article publié avec succès');
 
-            return $this->redirectToRoute('blog_publication_view',
-                ['id' => $article->getId(), 'slug' => $article->getSlug(),]);
+            return $this->redirectToRoute('blog_publication_view', ['id' => $article->getId(), 'slug' => $article->getSlug(),]);
         }
 
         return $this->render('blog/new_publication.html.twig', ['form' => $form->createView(),
@@ -60,11 +56,9 @@ class BlogController extends AbstractController {
     #[Route('/publication/{id}/{slug}/', name: 'publication_view')]
     #[ParamConverter('article', options: ['mapping' => ['id' => 'id', 'slug' => 'slug']])]
     public function publicationView(Article $article, Request $request, ManagerRegistry $doctrine): Response {
-if(!$this->getUser()){
-    return $this->render('blog/publication_view.html.twig', [
-        'article' => $article,
-    ]);
-}
+        if (!$this->getUser()) {
+            return $this->render('blog/publication_view.html.twig', ['article' => $article,]);
+        }
         $comment = new Comment();
 
         $form = $this->createForm(CommentFormType::class, $comment);
@@ -72,11 +66,7 @@ if(!$this->getUser()){
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $comment
-                ->setPublicationDate(new \DateTime())
-                ->setAuthor($this->getUser())
-                ->setArticle($article);
-            ;
+            $comment->setPublicationDate(new \DateTime())->setAuthor($this->getUser())->setArticle($article);;
 
             $em = $doctrine->getManager();
             $em->persist($comment);
@@ -90,18 +80,14 @@ if(!$this->getUser()){
             $comment = new Comment;
             $form = $this->createForm(CommentFormType::class, $comment);
         }
-        return $this->render('blog/publication_view.html.twig', [
-            'article' => $article,
-            'form' => $form->createView()
-            ]);
+        return $this->render('blog/publication_view.html.twig', ['article' => $article, 'form' => $form->createView()]);
     }
 
     /**
      *
      */
     #[Route('/publications/liste', name: 'publication_list')]
-    public function publicationList(ManagerRegistry $doctrine, Request $request,
-        PaginatorInterface $paginator): Response {
+    public function publicationList(ManagerRegistry $doctrine, Request $request, PaginatorInterface $paginator): Response {
 
         $requestedPage = $request->query->getInt('page', 1);
 
@@ -151,8 +137,7 @@ if(!$this->getUser()){
      */
     #[Route("/publications/modifier/{id}/", name: 'publication_edit', priority: 10)]
     #[isGranted("ROLE_ADMIN")]
-    public function publicationEdit(Article $article, Request $request, ManagerRegistry $doctrine,
-        SluggerInterface $slugger): Response {
+    public function publicationEdit(Article $article, Request $request, ManagerRegistry $doctrine, SluggerInterface $slugger): Response {
 
         $form = $this->createForm(NewArticleFormType::class, $article);
 
@@ -166,8 +151,7 @@ if(!$this->getUser()){
             $em->flush();
 
             $this->addFlash('success', 'Article supprimé avec succès');
-            return $this->redirectToRoute('blog_publication_view',
-                ['id' => $article->getId(), 'slug' => $article->getSlug(),]);
+            return $this->redirectToRoute('blog_publication_view', ['id' => $article->getId(), 'slug' => $article->getSlug(),]);
         }
 
         return $this->render('blog/publication_edit.html.twig', ['form' => $form->createView(),]);
@@ -175,9 +159,9 @@ if(!$this->getUser()){
 
     #[Route('/commentaire/suppression/{id}/', name: "comment_delete")]
     #[IsGranted('ROLE_ADMIN')]
-    public function commentDelete(Comment $comment, Request $request, ManagerRegistry $doctrine): Response{
+    public function commentDelete(Comment $comment, Request $request, ManagerRegistry $doctrine): Response {
 
-        if(!$this->isCsrfTokenValid('blog_comment_delete_' . $comment->getId() , $request->query->get('csrf_token'))){
+        if (!$this->isCsrfTokenValid('blog_comment_delete_' . $comment->getId(), $request->query->get('csrf_token'))) {
             $this->addFlash('error', 'Token sécurité invalide, veuillez ré-essayer');
         } else {
 
@@ -187,10 +171,36 @@ if(!$this->getUser()){
 
             $this->addFlash('success', 'Le commentaire a été supprimé avec succès');
         }
-        return $this->redirectToRoute('blog_publication_view', [
-           'id'=>$comment->getArticle()->getId(),
-           'slug'=>$comment->getArticle()->getSlug()
-        ]);
+        return $this->redirectToRoute('blog_publication_view', ['id' => $comment->getArticle()->getId(), 'slug' => $comment->getArticle()->getSlug()]);
 
+    }
+
+    #[Route('/recherche/', name: 'search')]
+    public function search(ManagerRegistry $doctrine, Request $request, PaginatorInterface $paginator): Response {
+
+        // Récupération de $_GET['page'], 1 si elle n'existe pas
+        $requestedPage = $request->query->getInt('page', 1);
+
+        // Vérification que le nombre est positif
+        if ($requestedPage < 1) {
+            throw new NotFoundHttpException();
+        }
+
+        // On récupère la recherche de l'utilisateur depuis l'URL ( $_GET['s'] )
+        $search = $request->query->get('s', '');
+
+        $em = $doctrine->getManager();
+
+        $query = $em->createQuery('SELECT a FROM App\Entity\Article a WHERE a.title LIKE :search OR a.content LIKE :search ORDER BY a.publicationDate DESC')
+            ->setParameters(['search' => '%' . $search . '%']);
+
+        $articles = $paginator->paginate($query,     // Requête créée juste avant
+            $requestedPage,     // Page qu'on souhaite voir
+            10,     // Nombre d'article à afficher par page
+        );
+
+        return $this->render('blog/list_search.html.twig', [
+            'articles' => $articles,
+            ]);
     }
 }

@@ -175,32 +175,45 @@ class BlogController extends AbstractController {
 
     }
 
+    /**
+     * Contrôleur de la page affichant les résultats des recherches faites par le formulaire de recherche dans la navbar
+     */
     #[Route('/recherche/', name: 'search')]
-    public function search(ManagerRegistry $doctrine, Request $request, PaginatorInterface $paginator): Response {
+    public function search(Request $request, PaginatorInterface $paginator, ManagerRegistry $doctrine): Response
+    {
 
-        // Récupération de $_GET['page'], 1 si elle n'existe pas
+        // Récupération du numéro de la page demandée dans l'url (si il existe pas, 1 sera pris à la place)
         $requestedPage = $request->query->getInt('page', 1);
 
-        // Vérification que le nombre est positif
-        if ($requestedPage < 1) {
+        // Si la page demandée est inférieur à 1, erreur 404
+        if($requestedPage < 1){
             throw new NotFoundHttpException();
         }
 
-        // On récupère la recherche de l'utilisateur depuis l'URL ( $_GET['s'] )
+        // On récupère la recherche de l'utilisateur depuis l'url ($_GET['q'])
         $search = $request->query->get('s', '');
 
+        // Récupération du manager général des entités
         $em = $doctrine->getManager();
 
-        $query = $em->createQuery('SELECT a FROM App\Entity\Article a WHERE a.title LIKE :search OR a.content LIKE :search ORDER BY a.publicationDate DESC')
-            ->setParameters(['search' => '%' . $search . '%']);
+        // Création d'une requête permettant de récupérer les articles pour la page actuelle, dont le titre ou le contenu contient la recherche de l'utilisateur
+        $query = $em
+            ->createQuery('SELECT a FROM App\Entity\Article a WHERE a.title LIKE :search OR a.content LIKE :search ORDER BY a.publicationDate DESC')
+            ->setParameters([
+                'search' => '%' . $search . '%',
+            ])
+        ;
 
-        $articles = $paginator->paginate($query,     // Requête créée juste avant
-            $requestedPage,     // Page qu'on souhaite voir
-            10,     // Nombre d'article à afficher par page
+        // Récupération des articles
+        $articles = $paginator->paginate(
+            $query,
+            $requestedPage,
+            10
         );
 
+        // Appel de la vue en lui envoyant les articles à afficher
         return $this->render('blog/list_search.html.twig', [
             'articles' => $articles,
-            ]);
+        ]);
     }
 }

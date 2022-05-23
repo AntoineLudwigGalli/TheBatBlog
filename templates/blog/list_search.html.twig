@@ -1,14 +1,18 @@
+{# Utilisation du squelette de page base.html.twig #}
 {% extends 'base.html.twig' %}
 
 {% set query = app.request.query.get('s') %}
 
+{# Titre de la page #}
 {% block title %}Résultat de la recherche "{{ query }}"{% endblock %}
 
 
+{# Contenu de la page #}
 {% block body %}
 
     <div class="container-fluid">
 
+        {# Titre h1 #}
         <div class="row">
             <h1 class="col-12 text-center my-5">Résultat de la recherche "{{ query }}"</h1>
         </div>
@@ -17,33 +21,27 @@
 
             <div class="col-12 col-md-8 mx-auto">
 
-
-                {# Affichage du nombre total d'articles (attribut apporté par KNP Paginator) #}
                 <div class="row">
-                    <p class="col-12 text-center">Articles trouvés : {{ articles.getTotalItemCount() }}</p>
+                    {# Affichage du nombre total de publications (attribut apporté par knp_paginator) #}
+                    <p class="col-12 text-center">Nombre total d'articles : {{ articles.getTotalItemCount }}</p>
                 </div>
 
-                {# Affichage du menu de navigation, seulement s'il y a des articles #}
+                {# S'il y a des articles, on affiche le menu de pagination de knp_paginator #}
                 {% if articles is not empty %}
 
                     <div class="row">
-
                         <div class="col-12 my-3 text-center">
-
                             <div class="d-inline-block">
                                 {{ knp_pagination_render(articles) }}
                             </div>
-
                         </div>
-
                     </div>
 
                 {% endif %}
 
-
+                {# Boucle pour parcourir tous les articles à afficher #}
                 {% for article in articles %}
 
-                    {# Un article #}
                     <div class="row">
 
                         <div class="col-12">
@@ -51,21 +49,21 @@
                             <div class="card my-3 bg-black">
 
                                 <div class="card-header">
-                                    <a href="{{ path('blog_publication_view', {'id': article.id, 'slug': article.slug}) }}" class="text-decoration-none">
-                                        <i class="far fa-newspaper me-2"></i>
-                                        {{ article.title }}
-                                    </a>
+
+                                    {# Titre de l'article, cliquable vers la page détaillée de l'article #}
+                                    <a class="text-decoration-none" href="{{ path('blog_publication_view', {'id': article.id, 'slug': article.slug}) }}"><i class="fa-solid fa-newspaper me-2"></i>{{ article.title }}</a>
                                 </div>
 
                                 <div class="card-body">
 
                                     <div class="mb-2">
 
-                                        {{ article.content|striptags|excerpt(100) }}
+                                        {# Affichage du contenu de l'article, tronqué à 150 caractères, sans balises html, suivi de "..." et d'un lien "lire la suite" #}
+                                        {{ article.content|striptags|excerpt(100) }}...
                                         <a class="text-decoration-none" href="{{ path('blog_publication_view', {'id': article.id, 'slug': article.slug}) }}">Lire la suite</a>
-
                                     </div>
 
+                                    {# Date et auteur de l'article #}
                                     <footer class="blockquote-footer my-2">Publié le <strong>{{ article.publicationDate|date('d/m/Y à H\\hi') }}</strong> par <strong>{{ article.author.pseudonym }}</strong></footer>
 
                                 </div>
@@ -73,7 +71,6 @@
                             </div>
 
                         </div>
-
                     </div>
 
                 {% else %}
@@ -84,22 +81,19 @@
 
                 {% endfor %}
 
-                {# Affichage du menu de navigation, seulement s'il y a des articles #}
+                {# S'il y a des articles, on affiche le menu de pagination #}
                 {% if articles is not empty %}
 
                     <div class="row">
-
                         <div class="col-12 my-3 text-center">
-
                             <div class="d-inline-block">
                                 {{ knp_pagination_render(articles) }}
                             </div>
-
                         </div>
-
                     </div>
 
                 {% endif %}
+
 
             </div>
 

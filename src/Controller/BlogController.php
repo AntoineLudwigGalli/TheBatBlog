@@ -172,4 +172,24 @@ if(!$this->getUser()){
 
         return $this->render('blog/publication_edit.html.twig', ['form' => $form->createView(),]);
     }
+
+    #[Route('/commentaire/suppression/{id}/', name: "comment_delete")]
+    #[IsGranted('ROLE_ADMIN')]
+    public function commentDelete(Comment $comment, Request $request, ManagerRegistry $doctrine): Response{
+        if(!$this->isCsrfTokenValid('blog_comment_delete_' . $comment->getId(), $request->query->get("csrf_token"))){
+            $this->addFlash('error', 'Token sécurité invalide, veuillez réessayer.');
+        } else {
+
+            $em = $doctrine->getManager();
+            $em->remove($comment);
+            $em->flush();
+
+            $this->addFlash('success', 'Le commentaire a été supprimé avec succès');
+        }
+        return $this->redirectToRoute('blog_publication_view', [
+           'id'=>$comment->getArticle()->getId(),
+           'slug'=>$comment->getArticle()->getSlug()
+        ]);
+
+    }
 }

@@ -176,8 +176,9 @@ if(!$this->getUser()){
     #[Route('/commentaire/suppression/{id}/', name: "comment_delete")]
     #[IsGranted('ROLE_ADMIN')]
     public function commentDelete(Comment $comment, Request $request, ManagerRegistry $doctrine): Response{
-        if(!$this->isCsrfTokenValid('blog_comment_delete_' . $comment->getId(), $request->query->get("csrf_token"))){
-            $this->addFlash('error', 'Token sécurité invalide, veuillez réessayer.');
+
+        if(!$this->isCsrfTokenValid('blog_comment_delete_' . $comment->getId() , $request->query->get('csrf_token'))){
+            $this->addFlash('error', 'Token sécurité invalide, veuillez ré-essayer');
         } else {
 
             $em = $doctrine->getManager();
